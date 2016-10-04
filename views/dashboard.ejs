@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    <h3>Welcome "<%= user %>"</h3><br>
+    <% if(user) { %>
+      <h3>Start your own todo list here. its very simple! Enjoy.</h3><br>
+    <% } %>
+    <h3>DASHBOARD</h3><span><a href="/logout">Logout</a></span>
+
+    <br>
+
+    <h3>Todo Items Listed: </h3><br>
+    <% todos.forEach(function(todo, i) { %>
+      <% i++ %>
+      <% var listitem = i + ". " + todo + "."; %>
+      <p>
+        <span><%= listitem %></span>
+        <span> <a id="itemDelete" href="/dashboard/delete/<%= i %>" title="delete">Delete</a> </span>
+        <span> <a href="/dashboard/update/<%= i %>">Update</a> </span>
+      </p>
+    <% }); %>
+
+    <form class="" action="/dashboard" method="post">
+      enter todo item to add: <input type="text" name="item" /><br>
+      <input type="submit" name="submit" value="submit"/><br>
+
+    </form><br>
+
+    <p>
+      length of list: <%= todos.length %>
+    </p>
+
+
+  </body>
+</html>
