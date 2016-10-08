@@ -14,7 +14,9 @@ router.get('/', function(req, res, next) {
     });
   }
   else {
-    res.render('dashboard', {title: "subhdcode Session", user: req.session.user.username, todos: req.session.user.todos});
+    res.render('dashboard', {title: "subhdcode Session", user: req.session.user.username, todos: req.session.user.todos}, function(err, html) {
+      res.redirect('/dashboard');
+    });
   }
 });
 
@@ -48,8 +50,7 @@ router.post('/login', function(req, res) {
         console.log(user);
 
         req.session.user = user;
-        res.render('dashboard', {user: req.session.user.username, todos: req.session.user.todos,
-        a: req.session.user.username}, function(err, html) {
+        res.render('dashboard', {user: req.session.user.username, todos: req.session.user.todos}, function(err, html) {
           res.redirect('/dashboard');
         });
 
@@ -60,7 +61,6 @@ router.post('/login', function(req, res) {
       });
     }
     else {
-      console.log("new_User: ");
       console.log(user);
 
       req.session.user = user;
@@ -68,8 +68,7 @@ router.post('/login', function(req, res) {
         //res.redirect('/dashboard');
       //});
 
-      res.render('dashboard', {user: req.session.user.username, todos: req.session.user.todos,
-      a: req.session.user.username}, function(err, html) {
+      res.render('dashboard', {user: req.session.user.username, todos: req.session.user.todos}, function(err, html) {
         res.redirect('/dashboard');
       });
     }
@@ -79,12 +78,13 @@ router.post('/login', function(req, res) {
 
 });
 
+
 router.get('/dashboard', function(req, res) {
   if(!req.session.user) {
     res.status(401).send("you'r not loggedin. unouthorised");
   }
 
-  res.render('dashboard', {title: "subhdcode Session", user: req.session.user.username, todos: req.session.user.todos});
+  res.render('dashboard', {user: req.session.user.username, todos: req.session.user.todos});
 });
 
 router.post('/dashboard', function(req, res) {
@@ -99,13 +99,11 @@ router.post('/dashboard', function(req, res) {
     {upsert: true, new: true},
     function(err, data) {
       console.log("todo added.");
-
-      res.render('dashboard', {title: "subhdcode Session", user: req.session.user.username, todos: data.todos});
+      res.render('dashboard', {user: req.session.user.username, todos: data.todos});
     }
   );
-
-
 });
+
 
 router.get('/dashboard/delete/:index', function(req, res) {
   var index = req.params.index;
@@ -117,8 +115,9 @@ router.get('/dashboard/delete/:index', function(req, res) {
       model.todos.splice(index-1, 1);
       model.save(function(updatedItem) {
         console.log("todo removed.");
+        console.log(model.todos);
 
-        res.render('dashboard', {title: "subhdcode Session", user: req.session.user.username, todos: model.todos});
+        res.render('dashboard', {user: req.session.user.username, todos: model.todos});
       });
 
     }
@@ -141,6 +140,7 @@ router.get('/dashboard/update/:index', function(req, res) {
 
 });
 
+
 router.post('/dashboard/update/:index', function(req, res) {
   var updated = req.body.updatedItem;
   var index = req.params.index;
@@ -149,12 +149,13 @@ router.post('/dashboard/update/:index', function(req, res) {
     {username: req.session.user.username},
     function(err, data) {
       model = data[0];
-      model.todos[index] = updated;
-      model.save(function(data) {
+      model.todos.set(index, updated);
 
-        res.render('dashboard', {title: "subhdcode Session", user: req.session.user.username, todos: model.todos}, function(err, html) {
-          res.redirect('/dashboard');
-        });
+      model.save(function(updatedItem) {
+        console.log("todo updated:");
+        console.log(model.todos);
+
+        res.render('dashboard', {user: req.session.user.username, todos: model.todos});
       });
 
     }
